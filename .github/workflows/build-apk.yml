@@ -1,3 +1,4 @@
+
 name: Build Gem Crush APK
 
 on:
@@ -27,15 +28,16 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Prepare web assets
+      - name: Prepare game files
         run: |
           mkdir -p www
           cp index.html www/index.html
 
       - name: Add Android platform
-        run: |
-          npx cap add android
-          npx cap sync android
+        run: npx cap add android
+
+      - name: Sync Android
+        run: npx cap sync android
 
       - name: Build APK
         run: |
@@ -48,4 +50,3 @@ jobs:
         with:
           name: Gem-Crush-APK
           path: android/app/build/outputs/apk/debug/app-debug.apk
-          
