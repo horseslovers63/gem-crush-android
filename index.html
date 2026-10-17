@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#24134f">
+<meta name="description" content="Play Gem Crush, a colorful free match-3 gem puzzle. Match three or more gems, build combos, and beat each level.">
+<title>Gem Crush — Match 3 Puzzle (v3)</title>
+<style>
+:root{color-scheme:dark;--bg:#100d2b;--panel:#241b4c;--pink:#ff79bf;--gold:#ffd86b;--s: min(92vw, 480px);--c:calc(var(--s) / 8);
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;min-height:100%;font-family:Inter,ui-rounded,"Segoe UI",system-ui,sans-serif;color:#fff}
+body{min-height:100dvh;background:radial-gradient(ellipse at 50% -10%,#5544a8 0,#211647 44%,#100d2b 100%);display:flex;justify-content:center;padding:env(safe-area-inset-top) 14px env(safe-area-inset-bottom);overflow-x:hidden}
+main{width:min(100%,560px);display:flex;flex-direction:column;align-items:center;padding:12px 0 20px}
+.brand{display:flex;align-items:center;gap:10px;margin:0 0 8px}.logo{font-size:30px;filter:drop-shadow(0 3px 7px #ff79bf66)}
+h1{font-size:clamp(28px,7vw,38px);letter-spacing:-1.4px;margin:0;font-weight:950;text-shadow:0 3px 0 #160b36}
+.subtitle{font-size:12px;color:#d6c9ff;margin:0 0 14px;letter-spacing:1.8px;text-transform:uppercase}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;width:var(--s);max-width:100%;margin-bottom:10px}
+.stat{background:linear-gradient(160deg,#ffffff18,#ffffff08);border:1px solid #ffffff1c;border-radius:13px;padding:8px 4px;text-align:center;box-shadow:0 6px 18px #08051d22}
+.stat small{display:block;font-size:9px;font-weight:800;letter-spacing:1.2px;color:#c7b9f4}.stat b{display:block;font-size:clamp(18px,5vw,23px);line-height:1.3;font-variant-numeric:tabular-nums}
+.goalwrap{width:var(--s);max-width:100%;margin:0 0 8px}.goalmeta{display:flex;justify-content:space-between;font-size:11px;color:#e7ddff;margin:0 2px 5px;font-weight:700}
+.goal{height:9px;border-radius:99px;background:#09071b99;overflow:hidden;border:1px solid #ffffff18}.goalbar{height:100%;width:0;background:linear-gradient(90deg,#5ef4dc,#ffd86b,#ff79bf);border-radius:99px;transition:width .25s}
+#board{position:relative;width:var(--s);height:var(--s);max-width:100%;background:linear-gradient(145deg,#0b0827aa,#39205e99);border:1px solid #ffffff2a;border-radius:20px;box-shadow:0 16px 40px #08051d66,inset 0 1px 0 #ffffff18;touch-action:pan-y;overflow:hidden}
+.tile{position:absolute;left:0;top:0;width:var(--c);height:var(--c);padding:calc(var(--c)*.075);cursor:pointer;transition:transform .2s ease,opacity .22s,scale .2s;touch-action:manipulation}
+.tile .gem{display:block;width:100%;height:100%;position:relative;clip-path:inherit;background:linear-gradient(140deg,var(--a),var(--b));filter:drop-shadow(0 3px 2px #05031888);transition:filter .15s}
+.tile .gem:before{content:"";position:absolute;inset:0;clip-path:inherit;background:linear-gradient(140deg,var(--a),var(--b));box-shadow:inset 0 1px 1px #ffffff88;pointer-events:none}
+.tile .gem:after{content:"";position:absolute;left:17%;top:13%;width:35%;height:15%;border-radius:50%;background:#ffffff99;transform:rotate(-35deg)}
+.tile.selected{scale:1.12;z-index:3}.tile.selected .gem{filter:drop-shadow(0 0 7px #fff) drop-shadow(0 3px 2px #05031888)}
+.tile.pop{opacity:0;scale:.25}
+.controls{display:flex;align-items:center;justify-content:center;gap:9px;margin:13px 0 5px;flex-wrap:wrap}
+button{font:inherit;font-size:14px;font-weight:850;color:white;background:linear-gradient(135deg,#ff8bc7,#d943a0);border:1px solid #ffffff30;border-radius:999px;padding:11px 17px;cursor:pointer;box-shadow:0 4px 0 #7e2366;transition:transform .1s,filter .15s}
+button:active{transform:translateY(2px);box-shadow:0 2px 0 #7e2366}
+button.secondary{background:#ffffff12;box-shadow:none;border-color:#ffffff30;padding:10px 13px}
+button:focus-visible{outline:3px solid var(--gold);outline-offset:3px}
+.hint{font-size:12px;line-height:1.5;text-align:center;color:#d6c9ff;max-width:360px;margin:8px 12px 0}
+.footer{font-size:10px;color:#9587c7;margin-top:14px;letter-spacing:.4px}
+.overlay{position:fixed;inset:0;background:#100923d9;backdrop-filter:blur(9px);display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
+.overlay.on{display:flex}.dialog{width:min(100%,360px);background:linear-gradient(145deg,#38245f,#1b143d);border:1px solid #ffffff2b;border-radius:24px;padding:28px 22px;text-align:center;box-shadow:0 24px 70px #0008}
+.dialog .trophy{font-size:42px}.dialog h2{font-size:30px;margin:8px 0}.dialog p{color:#ddd1ff;margin:0 0 18px}.dialog .actions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
+@media(max-height:720px){main{padding-top:4px}.brand{margin-bottom:3px}.subtitle{margin-bottom:8px}.stats{margin-bottom:6px}.goalwrap{margin-bottom:5px}.controls{margin-top:8px}.hint{margin-top:4px}.footer{margin-top:7px}}
+@media(min-width:700px){main{padding-top:22px}.subtitle{margin-bottom:20px}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <div class="brand"><span class="logo" aria-hidden="true">💎</span><h1>Gem Crush</h1></div>
+  <p class="subtitle">Match • Crush • Shine</p>
+  <section class="stats" aria-label="Game statistics">
+    <div class="stat"><small>SCORE</small><b id="sc">0</b></div>
+    <div class="stat"><small>MOVES</small><b id="mv">22</b></div>
+    <div class="stat"><small>LEVEL</small><b id="lv">1</b></div>
+    <div class="stat"><small>BEST</small><b id="bs">0</b></div>
+  </section>
+  <section class="goalwrap" aria-label="Level target">
+    <div class="goalmeta"><span>LEVEL TARGET</span><span id="gt">0 / 250</span></div>
+    <div class="goal"><div class="goalbar" id="gb"></div></div>
+  </section>
+  <div id="board" role="grid" aria-label="Gem board"></div>
+  <div class="controls">
+    <button id="sound" class="secondary" type="button" aria-pressed="true">🔊 Sound On</button>
+    <button id="restart" class="secondary" type="button">↻ Restart</button>
+    <button id="newgame" type="button">New Game</button>
+  </div>
+  <p class="hint" id="hint">Tap or click a gem, then a neighboring gem. Match 3 or more of the same color!</p>
+  <div class="footer">A little sparkle goes a long way ✦</div>
+</main>
+<div class="overlay on" id="welcome">
+  <div class="dialog"><div class="trophy">💎✨</div><h2>Ready to Crush?</h2><p>Match gems, trigger combos, and reach the target before your moves run out.</p><div class="actions"><button id="start">Let's Play</button></div></div>
+</div>
+<div class="overlay" id="ov" role="dialog" aria-modal="true" aria-labelledby="ot">
+  <div class="dialog"><div class="trophy" id="emoji">🏆</div><h2 id="ot">Level Complete!</h2><p id="message">Great work!</p><div class="actions"><button id="re">Next Level</button><button id="exit" class="secondary">New Game</button></div></div>
+</div>
+<script>
+"use strict";
+const N=8,TYPES=[
+ ['#ff8b9c','#e52f58','polygon(50% 3%,97% 38%,50% 97%,3% 38%)'],
+ ['#75f4df','#0b9d8b','polygon(25% 5%,75% 5%,97% 50%,75% 95%,25% 95%,3% 50%)'],
+ ['#86caff','#2873e5','polygon(30% 4%,70% 4%,96% 30%,96% 70%,70% 96%,30% 96%,4% 70%,4% 30%)'],
+ ['#ffe88b','#f18b20','inset(6% round 22%)'],
+ ['#ff9bd2','#d83e9c','circle(47%)'],
+ ['#d0b0ff','#7844ef','polygon(50% 3%,97% 40%,80% 96%,20% 96%,3% 40%)']
+];
+const $=id=>document.getElementById(id),board=$("board");
+let g=[],S=320,C=40,score=0,moves=22,sel=null,busy=false,best=0,level=1,base=0,goal=250,over=false,soundOn=true,audio=null;
+try{best=Number(localStorage.getItem("gc_best"))||0;level=Math.max(1,Number(localStorage.getItem("gc_level"))||1)}catch(e){}
+$("bs").textContent=best;
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function beep(freq=500,duration=.1){if(!soundOn)return;try{audio=audio||new(window.AudioContext||window.webkitAudioContext)();if(audio.state==="suspended")audio.resume();const o=audio.createOscillator(),v=audio.createGain();o.type="triangle";o.frequency.value=freq;v.gain.setValueAtTime(.09,audio.currentTime);v.gain.exponentialRampToValueAtTime(.001,audio.currentTime+duration);o.connect(v);v.connect(audio.destination);o.start();o.stop(audio.currentTime+duration)}catch(e){}}
+function fit(){const width=Math.min(window.innerWidth-28,480);const available=window.innerHeight<680?window.innerHeight-260:width;S=Math.max(240,Math.min(width,available));C=S/N;document.documentElement.style.setProperty("--s",S+"px");document.documentElement.style.setProperty("--c",C+"px");g.flat().forEach(t=>t&&place(t))}
+function place(t){t.el.style.transform=`translate(${t.c*C}px,${t.r*C}px)`}
+function mk(r,c,type){const t={r,c,type,el:document.createElement("div")};t.el.className="tile";t.el.setAttribute("role","gridcell");t.el.setAttribute("aria-label",`Gem ${type+1}`);const i=document.createElement("i");i.className="gem";t.el.appendChild(i);paint(t);t.el.addEventListener("click",()=>click(t));board.appendChild(t.el);place(t);return t}
+function paint(t){const T=TYPES[t.type];if(t.el.firstChild){t.el.firstChild.style.cssText=`--a:${T[0]};--b:${T[1]};clip-path:${T[2]};background:linear-gradient(140deg,${T[0]},${T[1]})`;t.el.firstChild.style.setProperty("--a",T[0]);t.el.firstChild.style.setProperty("--b",T[1]);}t.el.setAttribute("aria-label",`Gem ${t.type+1}`)}
+function init(full=true){if(full){score=0;level=1}over=false;busy=false;sel=null;board.innerHTML="";g=[];base=score;goal=150+level*100;moves=22;
+for(let r=0;r<N;r++){g[r]=[];for(let c=0;c<N;c++){let ty;do{ty=Math.random()*TYPES.length|0}while((c>1&&g[r][c-1].type===ty&&g[r][c-2].type===ty)||(r>1&&g[r-1][c].type===ty&&g[r-2][c].type===ty));g[r][c]=mk(r,c,ty)}}
+$("ov").classList.remove("on");ui();try{localStorage.setItem("gc_level",String(level))}catch(e){}}
+function ui(){$("sc").textContent=score.toLocaleString();$("mv").textContent=moves;$("lv").textContent=level;$("gb").style.width=Math.min(1,(score-base)/goal)*100+"%";$("gt").textContent=Math.min(score-base,goal).toLocaleString()+" / "+goal.toLocaleString();$("bs").textContent=best}
+function findMatches(){const m=new Set();for(let r=0;r<N;r++)for(let c=0;c<N-2;c++){const a=g[r][c],b=g[r][c+1],d=g[r][c+2];if(a&&b&&d&&a.type===b.type&&b.type===d.type){m.add(a);m.add(b);m.add(d)}}for(let c=0;c<N;c++)for(let r=0;r<N-2;r++){const a=g[r][c],b=g[r+1][c],d=g[r+2][c];if(a&&b&&d&&a.type===b.type&&b.type===d.type){m.add(a);m.add(b);m.add(d)}}return m}
+function swap(a,b){g[a.r][a.c]=b;g[b.r][b.c]=a;[a.r,b.r]=[b.r,a.r];[a.c,b.c]=[b.c,a.c];place(a);place(b)}
+async function click(t){if(busy||over)return;if(!sel){sel=t;t.el.classList.add("selected");beep(520,.05);return}sel.el.classList.remove("selected");const s=sel;sel=null;if(s===t)return;if(Math.abs(s.r-t.r)+Math.abs(s.c-t.c)!==1){sel=t;t.el.classList.add("selected");return}busy=true;swap(s,t);await sleep(210);if(!findMatches().size){swap(s,t);beep(180,.08);await sleep(210);busy=false;return}moves--;ui();await resolve();if(score-base>=goal)win();else if(moves<=0)end();else if(!hasMove())await shuffle();busy=false}
+async function resolve(){let combo=0,m;while((m=findMatches()).size){combo++;beep(380+combo*115,.14);score+=m.size*10*combo+(m.size>3?(m.size-3)*20:0);ui();m.forEach(t=>{t.el.classList.add("pop");g[t.r][t.c]=null});await sleep(220);m.forEach(t=>t.el.remove());for(let c=0;c<N;c++){let w=N-1;for(let r=N-1;r>=0;r--)if(g[r][c]){const t=g[r][c];g[r][c]=null;g[w][c]=t;t.r=w;place(t);w--}for(let r=w;r>=0;r--){const t=mk(r,c,Math.random()*TYPES.length|0);t.el.style.transition="none";t.el.style.transform=`translate(${c*C}px,${(r-w-2)*C}px)`;g[r][c]=t;t.el.offsetHeight;t.el.style.transition="";place(t)}}await sleep(260)}}
+function hasMove(){for(let r=0;r<N;r++)for(let c=0;c<N;c++)for(const[dr,dc]of[[0,1],[1,0]]){const r2=r+dr,c2=c+dc;if(r2>=N||c2>=N)continue;const a=g[r][c],b=g[r2][c2];g[r][c]=b;g[r2][c2]=a;const ok=findMatches().size>0;g[r][c]=a;g[r2][c2]=b;if(ok)return true}return false}
+async function shuffle(){const f=g.flat();let tries=0;do{f.forEach(t=>{t.type=Math.random()*TYPES.length|0;paint(t)});tries++}while((findMatches().size||!hasMove())&&tries<100);if(tries>=100)init(false);await sleep(250)}
+function saveBest(){if(score>best){best=score;try{localStorage.setItem("gc_best",String(best))}catch(e){}}}
+function showEnd(title,emoji,message,button){$("ot").textContent=title;$("emoji").textContent=emoji;$("message").textContent=message;$("re").textContent=button;$("ov").classList.add("on")}
+function win(){beep(760,.28);score+=moves*20;saveBest();level++;over=true;ui();try{localStorage.setItem("gc_level",String(level))}catch(e){}showEnd("Level Complete!","🏆",`Brilliant! Bonus points added. You reached level ${level}.`,"Next Level")}
+function end(){over=true;saveBest();ui();showEnd("Out of Moves","💫",`You scored ${score.toLocaleString()} points. Give it another try!`,"Try Again")}
+$("re").addEventListener("click",()=>{if(over&&$("ot").textContent==="Level Complete!"){over=false;init(false)}else init(true)});$("exit").addEventListener("click",()=>{init(true);$("ov").classList.remove("on")});
+$("restart").addEventListener("click",()=>{if(!busy)init(false)});$("newgame").addEventListener("click",()=>{if(!busy)init(true)});
+$("sound").addEventListener("click",()=>{soundOn=!soundOn;$("sound").textContent=soundOn?"🔊 Sound On":"🔇 Sound Off";$("sound").setAttribute("aria-pressed",String(soundOn));if(soundOn)beep(620,.08)});
+$("start").addEventListener("click",()=>{$("welcome").classList.remove("on");beep(620,.1)});
+window.addEventListener("resize",fit);window.addEventListener("orientationchange",()=>setTimeout(fit,150));
+fit();init(false);
+</script>
+</body>
+</html>
